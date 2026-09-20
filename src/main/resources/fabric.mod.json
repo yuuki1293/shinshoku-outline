@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "shinshoku_outline",
+  "version": "${version}",
+  "name": "侵食大会アウトライン",
+  "description": "第八回侵食大会の立ち位置と採掘範囲を表示するクライアントMOD",
+  "environment": "client",
+  "entrypoints": { "client": ["jp.shinshoku.outline.OutlineClient"] },
+  "license": "MIT",
+  "depends": { "fabricloader": ">=0.15.11", "fabric": ">=0.77.0", "minecraft": "1.18.2", "java": ">=17" }
+}
