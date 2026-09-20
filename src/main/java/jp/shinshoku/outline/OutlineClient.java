@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 package jp.shinshoku.outline;
 
-import com.google.gson.Gson;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -16,25 +15,9 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.glfw.GLFW;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Locale;
-import java.util.Objects;
 
 public final class OutlineClient implements ClientModInitializer {
-    // Minecraft 1.18.2 bundles Gson 2.8.x, which cannot deserialize Java records.
-    public static final class Lane {
-        private double x;
-        private String group;
-        private int number;
-        private String cell;
-        public double x() { return x; }
-        public String group() { return group; }
-        public int number() { return number; }
-    }
-    public static Lane[] lanes;
-    public static double[] centers;
     public static OutlineConfig config;
     public static boolean automatic = true;
     public static int selectedLane;
@@ -45,12 +28,7 @@ public final class OutlineClient implements ClientModInitializer {
     private static KeyBinding toggle, settings, lock;
 
     @Override public void onInitializeClient() {
-        try (var reader = new InputStreamReader(Objects.requireNonNull(
-                OutlineClient.class.getResourceAsStream("/lanes.json")), StandardCharsets.UTF_8)) {
-            lanes = new Gson().fromJson(reader, Lane[].class);
-        } catch (Exception e) { throw new IllegalStateException("Cannot read tournament coordinates", e); }
         config = OutlineConfig.load();
-        rebuildCenters();
         toggle = key("toggle", GLFW.GLFW_KEY_O);
         settings = key("settings", GLFW.GLFW_KEY_P);
         lock = key("lock", GLFW.GLFW_KEY_G);
@@ -77,15 +55,14 @@ public final class OutlineClient implements ClientModInitializer {
             if (!visible(c) || !config.hud) return;
             updateSelection(c);
             if (automatic && !selectionAvailable) {
-                c.textRenderer.drawWithShadow(matrices,"侵食: 足元は対象範囲外です（X範囲・最低Yを確認）",8,8,0xFFCC55);
+                c.textRenderer.drawWithShadow(matrices,"侵食: 足元は最低Yより下です",8,8,0xFFCC55);
                 return;
             }
-            Lane lane = lanes[selectedLane];
             int standingY = config.mode.standingY(selectedY);
-            double centerX=centers[selectedLane];
+            double centerX=selectedCenterX();
             int x = (int)Math.floor(centerX);
             c.textRenderer.drawWithShadow(matrices, String.format(Locale.ROOT,
-                    "侵食 %s%d  X %.1f  足Y %d  [%s / %s]", lane.group(), lane.number(), centerX, standingY,
+                    "侵食  X %.1f  足Y %d  [%s / %s]", centerX, standingY,
                     automatic ? "自動" : "固定", config.mode.label()), 8, 8, 0x55FFFF);
             c.textRenderer.drawWithShadow(matrices, String.format(Locale.ROOT,
                     "掘る範囲 X %d～%d / Y %d～%d / 南北方向", x-5, x+5, selectedY, selectedY+config.mode.height(selectedY)-1), 8, 20, 0xFFFFFF);
@@ -100,13 +77,12 @@ public final class OutlineClient implements ClientModInitializer {
         });
     }
 
-    private static void rebuildCenters() {
-        centers=Geometry.shiftedCenters(Arrays.stream(lanes).mapToDouble(Lane::x).toArray(),config.baseX);
+    public static double selectedCenterX() {
+        return Geometry.gridCenter(config.baseX,selectedLane);
     }
     public static void setBaseX(double x) {
         if (!Geometry.validBaseX(x)) throw new IllegalArgumentException("Invalid base X");
         config.baseX=Geometry.blockCenter(x);
-        rebuildCenters();
         MinecraftClient c=MinecraftClient.getInstance();
         updateSelection(c);
         save(c);
@@ -121,8 +97,8 @@ public final class OutlineClient implements ClientModInitializer {
     }
     public static void updateSelection(MinecraftClient c) {
         if (automatic && c.player != null && c.world != null) {
-            int containing = Geometry.containingLane(c.player.getX(), centers);
-            selectionAvailable = containing >= 0 && config.mode.containsHeight(c.player.getY());
+            int containing = Geometry.gridIndex(c.player.getX(), config.baseX);
+            selectionAvailable = config.mode.containsHeight(c.player.getY());
             if (selectionAvailable) selectedLane = containing;
             selectedY = config.mode.base(c.player.getY());
         }
@@ -135,7 +111,7 @@ public final class OutlineClient implements ClientModInitializer {
         if (!visible(c)) return;
         updateSelection(c);
         if (automatic && !selectionAvailable) return;
-        double centerX = centers[selectedLane];
+        double centerX = selectedCenterX();
         // Only nearby guides are drawn; Z endpoints are display limits, not excavation boundaries.
         if (Math.abs(c.player.getX()-centerX) > 256 || Math.abs(c.player.getY()-selectedY) > 256) return;
         Vec3d camera = ctx.camera().getPos();

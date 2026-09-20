@@ -12,10 +12,6 @@ public final class GeometryTest {
         checks++; if (!condition) throw new AssertionError(message);
     }
     public static void main(String[] args) throws Exception {
-        try (var reader=new InputStreamReader(Objects.requireNonNull(GeometryTest.class.getResourceAsStream("/lanes.json")),StandardCharsets.UTF_8)) {
-            var lanes=new com.google.gson.Gson().fromJson(reader,OutlineClient.Lane[].class);
-            check(lanes.length==273 && lanes[0].x()==-1487.5 && lanes[272].group().equals("D"),"runtime Gson deserialization");
-        }
         double[] xs;
         try (var reader=new InputStreamReader(Objects.requireNonNull(GeometryTest.class.getResourceAsStream("/lanes.json")),StandardCharsets.UTF_8)) {
             var rows=JsonParser.parseReader(reader).getAsJsonArray();
@@ -111,6 +107,17 @@ public final class GeometryTest {
         check(java.util.Arrays.equals(xs,Geometry.shiftedCenters(xs,Geometry.DEFAULT_BASE_X)),"reset restores all Excel coordinates exactly");
         check(!Geometry.validBaseX(Double.NaN) && !Geometry.validBaseX(Double.POSITIVE_INFINITY)
                 && !Geometry.validBaseX(30000000) && Geometry.validBaseX(-1487.5),"origin validation");
+        for (double anchor:new double[]{-1487.5,100.5,-.5}) {
+            for (int index:new int[]{-1000000,-274,-1,0,1,273,1000000}) {
+                double center=Geometry.gridCenter(anchor,index);
+                check(Geometry.gridIndex(center,anchor)==index,"unbounded positive and negative grid indices");
+                check(Geometry.gridIndex(center-5.5,anchor)==index,"inclusive left edge");
+                check(Geometry.gridIndex(center+5.499,anchor)==index,"right interior");
+                check(Geometry.gridIndex(center+5.5,anchor)==index+1,"exclusive right edge");
+                check(Geometry.gridCenter(anchor,index+1)-center==11,"spacing stays eleven beyond old endpoints");
+            }
+        }
+        for (int i=0;i<xs.length;i++) check(Geometry.gridCenter(Geometry.DEFAULT_BASE_X,i)==xs[i],"default grid preserves original coordinates");
         System.out.println("Geometry tests passed: "+checks+" checks");
     }
 }

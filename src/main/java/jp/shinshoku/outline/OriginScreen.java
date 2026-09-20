@@ -15,7 +15,7 @@ public final class OriginScreen extends Screen {
     @Override protected void init() {
         top=Math.max(24,(height-190)/2);
         int left=width/2-140;
-        baseField=new TextFieldWidget(textRenderer,left+64,top+40,136,20,new LiteralText("基準X（A1）"));
+        baseField=new TextFieldWidget(textRenderer,left+64,top+40,136,20,new LiteralText("基準X"));
         baseField.setMaxLength(24);
         baseField.setText(Double.toString(OutlineClient.config.baseX));
         addDrawableChild(baseField);
@@ -30,7 +30,7 @@ public final class OriginScreen extends Screen {
         addDrawableChild(new ButtonWidget(left,top+158,280,20,new LiteralText("戻る"),b -> close()));
     }
     private void apply(double x) {
-        if (!Geometry.validBaseX(x)) { message="全列がワールド内に収まるXを入力してください"; return; }
+        if (!Geometry.validBaseX(x)) { message="ワールド内のX座標を入力してください"; return; }
         OutlineClient.setBaseX(x);
         baseField.setText(Double.toString(OutlineClient.config.baseX));
         message="基準Xを適用しました";
@@ -41,7 +41,7 @@ public final class OriginScreen extends Screen {
     @Override public void render(MatrixStack matrices,int mouseX,int mouseY,float delta) {
         renderBackground(matrices);
         drawCenteredText(matrices,textRenderer,title,width/2,top-16,0xFFFFFF);
-        drawCenteredText(matrices,textRenderer,"A1の立ち位置を基準に273列全体を移動",width/2,top+4,0xAADDFF);
+        drawCenteredText(matrices,textRenderer,"基準Xから東西へ11ブロック間隔で表示",width/2,top+4,0xAADDFF);
         drawCenteredText(matrices,textRenderer,"ブロック中央（小数 .5）に合わせます",width/2,top+18,0xBBBBBB);
         textRenderer.drawWithShadow(matrices,"基準X",width/2-140,top+46,0xFFFFFF);
         drawCenteredText(matrices,textRenderer,"適用中: "+OutlineClient.config.baseX,width/2,top+126,0xFFFFFF);

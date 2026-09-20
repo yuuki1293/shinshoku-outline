@@ -6,8 +6,13 @@ public final class Geometry {
     public static final double DEFAULT_BASE_X = -1487.5;
     public static double blockCenter(double x) { return Math.floor(x)+0.5; }
     public static boolean validBaseX(double x) {
-        return Double.isFinite(x) && blockCenter(x)-5.5>=-30000000
-                && blockCenter(x)+272*11+5.5<=30000000;
+        return Double.isFinite(x) && x>=-30000000 && x<30000000;
+    }
+    public static int gridIndex(double x,double baseX) {
+        return (int)Math.floor((x-blockCenter(baseX)+5.5)/11);
+    }
+    public static double gridCenter(double baseX,int index) {
+        return blockCenter(baseX)+11.0*index;
     }
     public static double[] shiftedCenters(double[] original,double baseX) {
         double[] result=new double[original.length];

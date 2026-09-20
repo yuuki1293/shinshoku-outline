@@ -18,7 +18,7 @@ public final class OutlineScreen extends Screen {
         xField = new TextFieldWidget(textRenderer,left+74,top+26,100,20,new LiteralText("X座標"));
         yField = new TextFieldWidget(textRenderer,left+74,top+52,100,20,new LiteralText("段の下端Y"));
         xField.setMaxLength(12); yField.setMaxLength(6);
-        xField.setText(Double.toString(OutlineClient.centers[OutlineClient.selectedLane]));
+        xField.setText(Double.toString(OutlineClient.selectedCenterX()));
         yField.setText(Integer.toString(OutlineClient.selectedY));
         addDrawableChild(xField); addDrawableChild(yField);
         addDrawableChild(new ButtonWidget(left+180,top+26,46,20,new LiteralText("前列"),b -> move(-1)));
@@ -63,8 +63,8 @@ public final class OutlineScreen extends Screen {
     private LiteralText modeLabel() { return new LiteralText("モード: "+OutlineClient.config.mode.label()+"（クリックで切替）"); }
     private void move(int delta) {
         try {
-            int i=Geometry.nearestLane(Double.parseDouble(xField.getText()),OutlineClient.centers);
-            xField.setText(Double.toString(OutlineClient.centers[Math.max(0,Math.min(OutlineClient.centers.length-1,i+delta))]));
+            int i=Geometry.gridIndex(Double.parseDouble(xField.getText()),OutlineClient.config.baseX);
+            xField.setText(Double.toString(Geometry.gridCenter(OutlineClient.config.baseX,i+delta)));
         } catch (NumberFormatException e) { error="Xに数値を入力してください"; }
     }
     private void shift(int delta) {
@@ -75,8 +75,8 @@ public final class OutlineScreen extends Screen {
         try {
             double x=Double.parseDouble(xField.getText());
             int y=Integer.parseInt(yField.getText());
-            int i=Geometry.nearestLane(x,OutlineClient.centers);
-            if (!Double.isFinite(x) || Math.abs(OutlineClient.centers[i]-x)>0.0001) {
+            int i=Geometry.gridIndex(x,OutlineClient.config.baseX);
+            if (!Double.isFinite(x) || Math.abs(Geometry.gridCenter(OutlineClient.config.baseX,i)-x)>0.0001) {
                 error="Xは現在の基準から11刻みの立ち位置です"; return;
             }
             if (!OutlineClient.config.mode.validBase(y)) {
