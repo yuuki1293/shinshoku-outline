@@ -3,6 +3,13 @@
 Minecraft Java Edition **1.18.2 / Fabric** 用のクライアントMODです。
 設定した基準Xから東西に11ブロック間隔の区画を作り、足元を含む区画を南北方向のガイドで表示します。
 
+
+
+https://github.com/user-attachments/assets/af2dda91-56b2-4661-9582-9bb294a3b135
+
+<img width="657" height="544" alt="image" src="https://github.com/user-attachments/assets/f2417e0a-900c-4a78-9723-9b4d6dc94d22" />
+
+
 ## 導入
 
 旧版を使っている場合は、ゲームを終了し、`mods` 内の旧 `shinshoku-outline` JARを外して新版に置き換えてください。同じMODの旧版と新版を同時に入れないでください。
