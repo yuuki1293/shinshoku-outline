@@ -47,10 +47,15 @@ public final class OutlineScreen extends Screen {
             b.setMessage(modeLabel());
             OutlineClient.save(client);
         }));
-        addDrawableChild(new ButtonWidget(left,top+160,280,20,distanceLabel(),b -> {
+        addDrawableChild(new ButtonWidget(left,top+160,136,20,distanceLabel(),b -> {
             int d=OutlineClient.config.guideDistance;
             OutlineClient.config.guideDistance=d<16?16:d<32?32:d<64?64:d<128?128:8;
             b.setMessage(distanceLabel());
+        }));
+        addDrawableChild(new ButtonWidget(left+144,top+160,136,20,decimalsLabel(),b -> {
+            OutlineClient.config.differenceDecimals=(OutlineClient.config.differenceDecimals+1)%7;
+            b.setMessage(decimalsLabel());
+            OutlineClient.save(client);
         }));
         addDrawableChild(new ButtonWidget(left,top+200,136,20,new LiteralText("基準X設定"),b -> {
             OutlineClient.save(client);
@@ -59,7 +64,8 @@ public final class OutlineScreen extends Screen {
         addDrawableChild(new ButtonWidget(left+144,top+200,136,20,new LiteralText("閉じる"),b -> close()));
     }
     private LiteralText flag(String label, boolean enabled) { return new LiteralText(label+": "+(enabled?"ON":"OFF")); }
-    private LiteralText distanceLabel() { return new LiteralText("南北のガイド表示距離: 各"+OutlineClient.config.guideDistance+"ブロック"); }
+    private LiteralText distanceLabel() { return new LiteralText("南北: 各"+OutlineClient.config.guideDistance+"ブロック"); }
+    private LiteralText decimalsLabel() { return new LiteralText("差の小数: "+OutlineClient.config.differenceDecimals+"桁"); }
     private LiteralText modeLabel() { return new LiteralText("モード: "+OutlineClient.config.mode.label()+"（クリックで切替）"); }
     private void move(int delta) {
         try {

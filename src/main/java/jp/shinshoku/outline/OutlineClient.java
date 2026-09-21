@@ -69,10 +69,9 @@ public final class OutlineClient implements ClientModInitializer {
             c.textRenderer.drawWithShadow(matrices, toggle.getBoundKeyLocalizedText().getString()+": 表示  "
                     +settings.getBoundKeyLocalizedText().getString()+": 設定  "
                     +lock.getBoundKeyLocalizedText().getString()+": 固定/自動", 8, 32, 0xDDDDDD);
-            boolean offX = Math.abs(c.player.getX() - centerX) > 0.25;
-            boolean offY = Math.abs(c.player.getY() - standingY) > 0.15;
-            if (offX || offY) c.textRenderer.drawWithShadow(matrices,
-                    String.format(Locale.ROOT, "立ち位置との差: X %+.2f / Y %+.2f",
+            String differenceFormat="立ち位置との差: X %+."+config.differenceDecimals+"f / Y %+."+config.differenceDecimals+"f";
+            c.textRenderer.drawWithShadow(matrices,
+                    String.format(Locale.ROOT, differenceFormat,
                             c.player.getX()-centerX, c.player.getY()-standingY), 8, 44, 0xFFCC55);
         });
     }

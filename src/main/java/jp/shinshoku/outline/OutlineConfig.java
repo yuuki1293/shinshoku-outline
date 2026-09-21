@@ -16,6 +16,7 @@ public final class OutlineConfig {
     public boolean throughWalls = true;
     public boolean hud = true;
     public int guideDistance = 32;
+    public int differenceDecimals = 2;
     public MiningMode mode = MiningMode.TEN;
     public double baseX = Geometry.DEFAULT_BASE_X;
 
@@ -25,6 +26,7 @@ public final class OutlineConfig {
                 OutlineConfig c = GSON.fromJson(reader, OutlineConfig.class);
                 if (c != null) {
                     c.guideDistance = Math.max(8, Math.min(128, c.guideDistance));
+                    c.differenceDecimals = Math.max(0, Math.min(6, c.differenceDecimals));
                     if (c.mode==null) c.mode=MiningMode.TEN;
                     c.baseX=Geometry.validBaseX(c.baseX)?Geometry.blockCenter(c.baseX):Geometry.DEFAULT_BASE_X;
                     return c;
